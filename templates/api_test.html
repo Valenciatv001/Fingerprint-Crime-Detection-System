@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>API Test - Fingerprint System</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+      }
+      .endpoint {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      .method {
+        display: inline-block;
+        background: #4caf50;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 3px;
+      }
+      .url {
+        font-family: monospace;
+        margin-left: 10px;
+      }
+      .result {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+      }
+      .success {
+        background: #d4edda;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Fingerprint System API Test</h1>
+
+    <div class="endpoint">
+      <span class="method">POST</span>
+      <span class="url">/capture</span>
+      <form id="captureForm" enctype="multipart/form-data">
+        <input type="file" name="fingerprint" required />
+        <input type="number" name="user_id" placeholder="User ID" required />
+        <button type="submit">Test</button>
+      </form>
+      <div id="captureResult" class="result"></div>
+    </div>
+
+    <div class="endpoint">
+      <span class="method">POST</span>
+      <span class="url">/match</span>
+      <form id="matchForm" enctype="multipart/form-data">
+        <input type="file" name="fingerprint" required />
+        <button type="submit">Test</button>
+      </form>
+      <div id="matchResult" class="result"></div>
+    </div>
+
+    <div class="endpoint">
+      <span class="method">GET</span>
+      <span class="url">/records/&lt;user_id&gt;</span>
+      <form id="recordsForm">
+        <input type="number" name="user_id" placeholder="User ID" required />
+        <button type="submit">Test</button>
+      </form>
+      <div id="recordsResult" class="result"></div>
+    </div>
+
+    <script>
+      const API_BASE = "http://" + window.location.host;
+
+      function showResult(elementId, message, isSuccess = true) {
+        const element = document.getElementById(elementId);
+        element.textContent = message;
+        element.className = isSuccess ? "result success" : "result error";
+      }
+
+      document
+        .getElementById("captureForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+
+          try {
+            const response = await fetch(API_BASE + "/capture", {
+              method: "POST",
+              body: formData,
+            });
+            const data = await response.json();
+            showResult(
+              "captureResult",
+              JSON.stringify(data, null, 2),
+              response.ok
+            );
+          } catch (error) {
+            showResult("captureResult", "Error: " + error.message, false);
+          }
+        });
+
+      document
+        .getElementById("matchForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+
+          try {
+            const response = await fetch(API_BASE + "/match", {
+              method: "POST",
+              body: formData,
+            });
+            const data = await response.json();
+            showResult(
+              "matchResult",
+              JSON.stringify(data, null, 2),
+              response.ok
+            );
+          } catch (error) {
+            showResult("matchResult", "Error: " + error.message, false);
+          }
+        });
+
+      document
+        .getElementById("recordsForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const userId = e.target.user_id.value;
+
+          try {
+            const response = await fetch(API_BASE + "/records/" + userId);
+            const data = await response.json();
+            showResult(
+              "recordsResult",
+              JSON.stringify(data, null, 2),
+              response.ok
+            );
+          } catch (error) {
+            showResult("recordsResult", "Error: " + error.message, false);
+          }
+        });
+    </script>
+  </body>
+</html>

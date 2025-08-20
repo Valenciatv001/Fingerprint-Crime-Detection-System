@@ -1,0 +1,471 @@
+<!-- <!DOCTYPE html>
+<html>
+  <head>
+    <title>Fingerprint Crime Detection System</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+      }
+      .section {
+        margin-bottom: 30px;
+        padding: 20px;
+        border: 1px solid #ddd;
+      }
+      .success {
+        color: green;
+      }
+      .error {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Fingerprint-Based Crime Detection System</h1>
+
+    <div class="section">
+      <h2>Capture Fingerprint</h2>
+      <form id="captureForm" enctype="multipart/form-data">
+        <input type="file" name="fingerprint" accept="image/*" required />
+        <input type="number" name="user_id" placeholder="User ID" required />
+        <button type="submit">Capture</button>
+      </form>
+      <div id="captureResult"></div>
+    </div>
+
+    <div class="section">
+      <h2>Match Fingerprint</h2>
+      <form id="matchForm" enctype="multipart/form-data">
+        <input type="file" name="fingerprint" accept="image/*" required />
+        <button type="submit">Match</button>
+      </form>
+      <div id="matchResult"></div>
+    </div>
+
+    <div class="section">
+      <h2>Get Criminal Records</h2>
+      <form id="recordsForm">
+        <input type="number" name="user_id" placeholder="User ID" required />
+        <button type="submit">Get Records</button>
+      </form>
+      <div id="recordsResult"></div>
+    </div>
+
+    <script>
+      // JavaScript for form submissions would go here
+      // Implement AJAX calls to the API endpoints
+    </script>
+  </body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fingerprint Crime Detection System</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+
+      header {
+        background: #2c3e50;
+        color: white;
+        padding: 2rem;
+        text-align: center;
+      }
+
+      header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .main-content {
+        padding: 2rem;
+      }
+
+      .section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #667eea;
+      }
+
+      .section h2 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+
+      input[type="file"],
+      input[type="number"],
+      input[type="text"] {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+      }
+
+      .result {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 5px;
+        display: none;
+      }
+
+      .success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .api-endpoints {
+        background: #e9ecef;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-top: 2rem;
+      }
+
+      .api-endpoints h3 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+      }
+
+      .endpoint {
+        background: white;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 5px;
+        border-left: 4px solid #28a745;
+      }
+
+      .method {
+        display: inline-block;
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+        font-weight: bold;
+        margin-right: 0.5rem;
+      }
+
+      .url {
+        font-family: "Courier New", monospace;
+        color: #495057;
+      }
+
+      footer {
+        text-align: center;
+        padding: 2rem;
+        background: #2c3e50;
+        color: white;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          margin: 10px;
+          border-radius: 10px;
+        }
+
+        header h1 {
+          font-size: 2rem;
+        }
+
+        .section {
+          padding: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Fingerprint Crime Detection System</h1>
+        <p>Advanced fingerprint analysis for criminal investigation</p>
+      </header>
+
+      <div class="main-content">
+        <div class="section">
+          <h2>Capture Fingerprint</h2>
+          <form id="captureForm" enctype="multipart/form-data">
+            <div class="form-group">
+              <label for="captureFile">Fingerprint Image:</label>
+              <input
+                type="file"
+                id="captureFile"
+                name="fingerprint"
+                accept="image/*"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="userId">User ID:</label>
+              <input
+                type="number"
+                id="userId"
+                name="user_id"
+                placeholder="Enter User ID"
+                required
+              />
+            </div>
+            <button type="submit">Capture Fingerprint</button>
+          </form>
+          <div id="captureResult" class="result"></div>
+        </div>
+
+        <div class="section">
+          <h2>Match Fingerprint</h2>
+          <form id="matchForm" enctype="multipart/form-data">
+            <div class="form-group">
+              <label for="matchFile">Fingerprint Image:</label>
+              <input
+                type="file"
+                id="matchFile"
+                name="fingerprint"
+                accept="image/*"
+                required
+              />
+            </div>
+            <button type="submit">Match Fingerprint</button>
+          </form>
+          <div id="matchResult" class="result"></div>
+        </div>
+
+        <div class="section">
+          <h2>Get Criminal Records</h2>
+          <form id="recordsForm">
+            <div class="form-group">
+              <label for="recordsUserId">User ID:</label>
+              <input
+                type="number"
+                id="recordsUserId"
+                name="user_id"
+                placeholder="Enter User ID"
+                required
+              />
+            </div>
+            <button type="submit">Get Records</button>
+          </form>
+          <div id="recordsResult" class="result"></div>
+        </div>
+
+        <div class="api-endpoints">
+          <h3>API Endpoints</h3>
+          <div class="endpoint">
+            <span class="method">POST</span>
+            <span class="url">/capture</span>
+            <p>Upload a fingerprint image and associate it with a user.</p>
+          </div>
+          <div class="endpoint">
+            <span class="method">POST</span>
+            <span class="url">/match</span>
+            <p>Upload a fingerprint image to match against the database.</p>
+          </div>
+          <div class="endpoint">
+            <span class="method">GET</span>
+            <span class="url">/records/&lt;user_id&gt;</span>
+            <p>Retrieve criminal records for a specific user.</p>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <p>
+          &copy; 2025 Fingerprint Crime Detection System. All rights reserved.
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      // API Base URL
+      const API_BASE = "http://" + window.location.host;
+
+      // Show result message
+      function showResult(elementId, message, isSuccess = true) {
+        const element = document.getElementById(elementId);
+        element.textContent = message;
+        element.className = isSuccess ? "result success" : "result error";
+        element.style.display = "block";
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          element.style.display = "none";
+        }, 5000);
+      }
+
+      // Capture Form Submission
+      document
+        .getElementById("captureForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const formData = new FormData();
+          formData.append(
+            "fingerprint",
+            document.getElementById("captureFile").files[0]
+          );
+          formData.append("user_id", document.getElementById("userId").value);
+
+          try {
+            const response = await fetch(API_BASE + "/capture", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              showResult(
+                "captureResult",
+                `Success: ${data.message} - Fingerprint ID: ${data.fingerprint_id}`,
+                true
+              );
+            } else {
+              showResult("captureResult", `Error: ${data.error}`, false);
+            }
+          } catch (error) {
+            showResult(
+              "captureResult",
+              `Network error: ${error.message}`,
+              false
+            );
+          }
+        });
+
+      // Match Form Submission
+      document
+        .getElementById("matchForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const formData = new FormData();
+          formData.append(
+            "fingerprint",
+            document.getElementById("matchFile").files[0]
+          );
+
+          try {
+            const response = await fetch(API_BASE + "/match", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              let message = `Best match: ${data.best_match} with score: ${(
+                data.best_score * 100
+              ).toFixed(2)}%`;
+              if (data.matched_user_id) {
+                message += ` - User ID: ${data.matched_user_id}`;
+              }
+              showResult("matchResult", message, true);
+            } else {
+              showResult("matchResult", `Error: ${data.error}`, false);
+            }
+          } catch (error) {
+            showResult("matchResult", `Network error: ${error.message}`, false);
+          }
+        });
+
+      // Records Form Submission
+      document
+        .getElementById("recordsForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const userId = document.getElementById("recordsUserId").value;
+
+          try {
+            const response = await fetch(API_BASE + "/records/" + userId);
+            const data = await response.json();
+
+            if (response.ok) {
+              let message = `Found ${data.total_records} records for User ID: ${data.user_id}`;
+              if (data.records && data.records.length > 0) {
+                message += "\n\nRecords:\n";
+                data.records.forEach((record) => {
+                  message += `- ${record.crime_type}: ${record.description} (${record.status})\n`;
+                });
+              }
+              showResult("recordsResult", message, true);
+            } else {
+              showResult("recordsResult", `Error: ${data.error}`, false);
+            }
+          } catch (error) {
+            showResult(
+              "recordsResult",
+              `Network error: ${error.message}`,
+              false
+            );
+          }
+        });
+    </script>
+  </body>
+</html>
