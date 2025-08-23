@@ -418,7 +418,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fingerprint Crime Detection System</title>
-    <style>
+    <!-- <style>
       * {
         box-sizing: border-box;
         margin: 0;
@@ -604,6 +604,190 @@
         .section {
           padding: 1.5rem;
         }
+      }
+    </style> -->
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Poppins", sans-serif;
+        color: #f1f1f1;
+        background: radial-gradient(
+          circle at top left,
+          #0f2027,
+          #203a43,
+          #2c5364
+        );
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: auto;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      header {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 2rem;
+        text-align: center;
+      }
+      header h1 {
+        font-size: 2.5rem;
+        color: #00ff88;
+        text-shadow: 0 0 15px #00ff88;
+      }
+      header p {
+        font-size: 1.2rem;
+        opacity: 0.85;
+      }
+
+      .main-content {
+        padding: 2rem;
+      }
+
+      .section {
+        margin-bottom: 2rem;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 2rem;
+        border-radius: 15px;
+        border-left: 4px solid #00ff88;
+        transition: transform 0.2s ease;
+      }
+      .section:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      .section h2 {
+        margin-bottom: 1rem;
+        font-size: 1.6rem;
+        color: #00ffcc;
+        text-shadow: 0 0 10px #00ffcc;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+      }
+
+      label {
+        position: absolute;
+        top: -10px;
+        left: 10px;
+        background: #2c5364;
+        padding: 0 6px;
+        font-size: 0.9rem;
+        color: #00ffcc;
+        font-weight: bold;
+        border-radius: 4px;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.9rem;
+        border: none;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.5);
+        color: #f1f1f1;
+        font-size: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+      }
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #00ffcc;
+        box-shadow: 0 0 8px #00ffcc;
+      }
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      button {
+        background: linear-gradient(90deg, #00ff88, #00ccff);
+        color: #000;
+        padding: 0.9rem 1.8rem;
+        border: none;
+        border-radius: 30px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 12px rgba(0, 255, 200, 0.6);
+      }
+      button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 25px rgba(0, 255, 200, 0.9);
+      }
+
+      .result {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        display: none;
+        font-weight: bold;
+      }
+      .success {
+        background: rgba(0, 255, 136, 0.2);
+        border: 1px solid #00ff88;
+        color: #00ff88;
+      }
+      .error {
+        background: rgba(255, 0, 100, 0.2);
+        border: 1px solid #ff0066;
+        color: #ff5599;
+      }
+
+      .api-endpoints {
+        margin-top: 2rem;
+        background: rgba(255, 255, 255, 0.07);
+        padding: 1.5rem;
+        border-radius: 15px;
+      }
+      .endpoint {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border-left: 4px solid #00ffcc;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 8px;
+      }
+      .method {
+        display: inline-block;
+        padding: 0.3rem 0.6rem;
+        border-radius: 5px;
+        background: #00ffcc;
+        color: #000;
+        font-weight: bold;
+        margin-right: 0.6rem;
+      }
+      .url {
+        font-family: "Courier New", monospace;
+        color: #00ffcc;
+      }
+
+      footer {
+        text-align: center;
+        padding: 1.5rem;
+        background: rgba(0, 0, 0, 0.7);
+        font-size: 0.9rem;
+      }
+      footer p {
+        color: #aaa;
       }
     </style>
   </head>
