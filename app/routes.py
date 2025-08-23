@@ -5,6 +5,7 @@ from .preprocessing import FingerprintPreprocessor
 from .feature_extraction import FeatureExtractor
 from .matching import FingerprintMatcher
 from .models import Fingerprint, CrimeRecord
+from .models import User
 
 
 # Add this debug code to your routes.py temporarily
@@ -39,137 +40,116 @@ main_bp = Blueprint('main', __name__)
 def index():
     return render_template('index.html')
 
+# @main_bp.route('/capture', methods=['POST'])
+# def capture_fingerprint():
+#     try:
+#         if 'fingerprint' not in request.files:
+#             return jsonify({'error': 'No file uploaded'}), 400
+        
+#         file = request.files['fingerprint']
+#         user_id = request.form.get('user_id')
+        
+#         if not user_id:
+#             return jsonify({'error': 'User ID required'}), 400
+        
+#         # Save uploaded file
+#         filepath = save_uploaded_file(file)
+#         if not filepath:
+#             return jsonify({'error': 'Invalid file type'}), 400
+        
+#         # Preprocess fingerprint
+#         preprocessor = FingerprintPreprocessor()
+#         preprocessed = preprocessor.preprocess(filepath)
+        
+#         # Extract features
+#         extractor = FeatureExtractor()
+#         template = extractor.extract_features(preprocessed)
+        
+#         # Save to database
+#         fingerprint = Fingerprint(user_id, template, filepath)
+#         fingerprint_id = fingerprint.save()
+        
+#         return jsonify({
+#             'message': 'Fingerprint captured successfully',
+#             'fingerprint_id': fingerprint_id,
+#             'template': template
+#         }), 201
+        
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+
+
+
+
+
+
+
+
 @main_bp.route('/capture', methods=['POST'])
 def capture_fingerprint():
     try:
         if 'fingerprint' not in request.files:
             return jsonify({'error': 'No file uploaded'}), 400
-        
+
         file = request.files['fingerprint']
         user_id = request.form.get('user_id')
+        full_name = request.form.get('full_name')
+        gender = request.form.get('gender')
+        purpose = request.form.get('purpose')
+
+
+
         
+
         if not user_id:
             return jsonify({'error': 'User ID required'}), 400
-        
-        # Save uploaded file
+
+        # ✅ Create new user if not exists
+        user = User(full_name=full_name, gender=gender)
+        user_id = user.save()
+
+
+        # ✅ Save uploaded file
         filepath = save_uploaded_file(file)
         if not filepath:
             return jsonify({'error': 'Invalid file type'}), 400
-        
-        # Preprocess fingerprint
+
+        # ✅ Preprocess fingerprint
         preprocessor = FingerprintPreprocessor()
         preprocessed = preprocessor.preprocess(filepath)
-        
-        # Extract features
+
+        # ✅ Extract features
         extractor = FeatureExtractor()
         template = extractor.extract_features(preprocessed)
-        
-        # Save to database
+
+        # ✅ Save to DB (fingerprint + optional suspect info)
         fingerprint = Fingerprint(user_id, template, filepath)
         fingerprint_id = fingerprint.save()
-        
+
+        # If you want to also save crime record (using "purpose" as description)
+        if purpose:
+            record = CrimeRecord(
+                user_id=user_id,
+                crime_type="General Crime",
+                description=purpose,
+                date_occurred=None,
+                status="ACTIVE"
+            )
+            record.save()
+
         return jsonify({
             'message': 'Fingerprint captured successfully',
             'fingerprint_id': fingerprint_id,
+            'user_id': user_id,
+            'full_name': full_name,
+            'gender': gender,
+            'purpose': purpose,
             'template': template
         }), 201
-        
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# @main_bp.route('/match', methods=['POST'])
-# def match_fingerprint():
-#     try:
-#         if 'fingerprint' not in request.files:
-#             return jsonify({'error': 'No file uploaded'}), 400
-        
-#         file = request.files['fingerprint']
-#         filepath = save_uploaded_file(file)
-#         if not filepath:
-#             return jsonify({'error': 'Invalid file type'}), 400
-        
-#         # Process query fingerprint
-#         preprocessor = FingerprintPreprocessor()
-#         preprocessed = preprocessor.preprocess(filepath)
-        
-#         extractor = FeatureExtractor()
-#         query_template = extractor.extract_features(preprocessed)
-        
-#         # Get all templates from database
-#         database_templates = Fingerprint.get_all_templates()
-        
-#         # Match against database
-#         matcher = FingerprintMatcher()
-#         result = matcher.find_best_match(query_template, 
-#                                        {k: v['template'] for k, v in database_templates.items()})
-        
-#         response = {
-#             'best_match': result['best_match'],
-#             'best_score': result['best_score'],
-#             'matches_found': len([m for m in result['all_matches'] if m['is_match']]),
-#             'all_matches': result['all_matches'][:10]  # Top 10 matches
-#         }
-        
-#         if result['best_match']:
-#             response['matched_user_id'] = database_templates[result['best_match']]['user_id']
-        
-#         return jsonify(response), 200
-        
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
-# In app/routes.py, update the match_fingerprint function:
-
-# @main_bp.route('/match', methods=['POST'])
-# def match_fingerprint():
-#     try:
-#         if 'fingerprint' not in request.files:
-#             return jsonify({'error': 'No file uploaded'}), 400
-        
-#         file = request.files['fingerprint']
-#         filepath = save_uploaded_file(file)
-#         if not filepath:
-#             return jsonify({'error': 'Invalid file type'}), 400
-        
-#         # Process query fingerprint
-#         preprocessor = FingerprintPreprocessor()
-#         preprocessed = preprocessor.preprocess(filepath)
-        
-#         extractor = FeatureExtractor()
-#         query_template = extractor.extract_features(preprocessed)
-        
-#         # Get all templates from database
-#         database_templates = Fingerprint.get_all_templates()
-        
-#         # Match against database
-#         matcher = FingerprintMatcher()
-#         result = matcher.find_best_match(query_template, 
-#                                        {k: v['template'] for k, v in database_templates.items()})
-        
-#         # Convert numpy types to Python native types for JSON serialization
-#         response = {
-#             'best_match': result['best_match'],
-#             'best_score': float(result['best_score']),
-#             'matches_found': int(result['matches_found']),
-#             'all_matches': [
-#                 {
-#                     'template_id': m['template_id'],
-#                     'similarity': float(m['similarity']),
-#                     'is_match': bool(m['is_match'])
-#                 }
-#                 for m in result['all_matches']
-#             ]
-#         }
-        
-#         if result['best_match']:
-#             response['matched_user_id'] = database_templates[result['best_match']]['user_id']
-        
-#         return jsonify(response), 200
-        
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
-# In app/routes.py, update the match_fingerprint function:
 
 @main_bp.route('/match', methods=['POST'])
 def match_fingerprint():

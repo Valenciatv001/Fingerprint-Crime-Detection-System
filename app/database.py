@@ -11,14 +11,18 @@ def init_db(app):
         cursor = conn.cursor()
         
         # Create tables
+ 
+
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
+                full_name VARCHAR(100) NOT NULL,
+                gender VARCHAR(10),
                 national_id VARCHAR(20) UNIQUE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+
         
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS fingerprints (
