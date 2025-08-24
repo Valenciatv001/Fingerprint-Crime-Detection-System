@@ -15,8 +15,6 @@ print(f"Current working directory: {os.getcwd()}")
 print(f"Templates directory exists: {os.path.exists('templates')}")
 print(f"Files in templates: {os.listdir('templates') if os.path.exists('templates') else 'NOT FOUND'}")
 
-
-
 class NumpyEncoder(json.JSONEncoder):
     """Custom JSON encoder for numpy types"""
     def default(self, obj):
@@ -32,57 +30,11 @@ class NumpyEncoder(json.JSONEncoder):
             return super(NumpyEncoder, self).default(obj)
 
 
-
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def index():
     return render_template('index.html')
-
-# @main_bp.route('/capture', methods=['POST'])
-# def capture_fingerprint():
-#     try:
-#         if 'fingerprint' not in request.files:
-#             return jsonify({'error': 'No file uploaded'}), 400
-        
-#         file = request.files['fingerprint']
-#         user_id = request.form.get('user_id')
-        
-#         if not user_id:
-#             return jsonify({'error': 'User ID required'}), 400
-        
-#         # Save uploaded file
-#         filepath = save_uploaded_file(file)
-#         if not filepath:
-#             return jsonify({'error': 'Invalid file type'}), 400
-        
-#         # Preprocess fingerprint
-#         preprocessor = FingerprintPreprocessor()
-#         preprocessed = preprocessor.preprocess(filepath)
-        
-#         # Extract features
-#         extractor = FeatureExtractor()
-#         template = extractor.extract_features(preprocessed)
-        
-#         # Save to database
-#         fingerprint = Fingerprint(user_id, template, filepath)
-#         fingerprint_id = fingerprint.save()
-        
-#         return jsonify({
-#             'message': 'Fingerprint captured successfully',
-#             'fingerprint_id': fingerprint_id,
-#             'template': template
-#         }), 201
-        
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
-
-
-
-
-
-
 
 @main_bp.route('/capture', methods=['POST'])
 def capture_fingerprint():
@@ -201,8 +153,7 @@ def match_fingerprint():
 
 
 
-# @app.route('/match', methods=['POST'])
-# def match_fingerprint():
+
 #     file = request.files['fingerprint']
 #     img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
 

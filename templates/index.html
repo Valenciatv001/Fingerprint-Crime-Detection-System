@@ -425,9 +425,83 @@
           top: 120%;
         }
       }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(5px);
+      }
+
+      .modal-content {
+        background: rgb(57, 178, 55);
+        margin: 10% auto;
+        padding: 2rem;
+        border-radius: 15px;
+        width: 500px;
+        max-width: 90%;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        animation: fadeIn 0.3s ease-in-out;
+      }
+
+      .modal-content h2 {
+        margin-bottom: 1rem;
+        color: #2c3e50;
+        font-size: 2.5rem;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.5rem;
+      }
+
+      .modal-content .detail {
+        margin-bottom: 0.8rem;
+        font-size: 1.5rem;
+        color: #0f2027;
+        display: flex;
+        padding-left: 0.5rem;
+        /* justify-content: space-between; */
+      }
+
+      .modal-content .detail strong {
+        color: #04209a;
+      }
+
+      .close-btn {
+        float: right;
+        font-size: 3.5rem;
+        cursor: pointer;
+        color: #aaa;
+      }
+
+      .close-btn:hover {
+        color: #333;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
     </style>
   </head>
   <body>
+    <!-- Modal Popup -->
+    <div id="resultModal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2 id="modalTitle">Result</h2>
+        <div id="modalBody"></div>
+      </div>
+    </div>
+
     <div class="container">
       <header>
         <h1>Fingerprint Crime Detection System</h1>
@@ -601,7 +675,7 @@
       </footer>
     </div>
 
-    <script>
+    <!-- <script>
       // API Base URL
       const API_BASE = "http://" + window.location.host;
 
@@ -724,6 +798,191 @@
               showResult("recordsResult", message, true);
             } else {
               showResult("recordsResult", `Error: ${data.error}`, false);
+            }
+          } catch (error) {
+            showResult(
+              "recordsResult",
+              `Network error: ${error.message}`,
+              false
+            );
+          }
+        });
+
+      function triggerScanner(inputId, scannerSelector) {
+        const input = document.getElementById(inputId);
+        const scanner = document.querySelector(scannerSelector + " .scan-line");
+        const statusText = document.querySelector(scannerSelector + " p");
+
+        input.addEventListener("change", () => {
+          if (input.files.length > 0) {
+            scanner.style.display = "block";
+            statusText.textContent = "Scanning fingerprint...";
+            setTimeout(() => {
+              scanner.style.display = "none";
+              statusText.textContent = "Scan complete ✅";
+            }, 3000);
+          }
+        });
+      }
+
+      // Attach to both forms
+      triggerScanner(
+        "captureFile",
+        ".section:nth-of-type(1) .fingerprint-scanner"
+      );
+      triggerScanner(
+        "matchFile",
+        ".section:nth-of-type(2) .fingerprint-scanner"
+      );
+
+
+      
+    </script> -->
+
+    <script>
+      // API Base URL
+      const API_BASE = "http://" + window.location.host;
+
+      // Show result message
+      // Modal Elements
+      const modal = document.getElementById("resultModal");
+      const modalBody = document.getElementById("modalBody");
+      const modalTitle = document.getElementById("modalTitle");
+      const closeBtn = document.querySelector(".close-btn");
+
+      function showModal(title, detailsHTML) {
+        modalTitle.textContent = title;
+        modalBody.innerHTML = detailsHTML;
+        modal.style.display = "block";
+      }
+
+      // Close modal
+      closeBtn.onclick = () => (modal.style.display = "none");
+      window.onclick = (event) => {
+        if (event.target === modal) modal.style.display = "none";
+      };
+
+      // Capture Form Submission
+      document
+        .getElementById("captureForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const formData = new FormData();
+          formData.append(
+            "fingerprint",
+            document.getElementById("captureFile").files[0]
+          );
+          formData.append("user_id", document.getElementById("userId").value);
+          formData.append(
+            "full_name",
+            document.getElementById("fullName").value
+          );
+          formData.append("gender", document.getElementById("gender").value);
+          formData.append("purpose", document.getElementById("purpose").value);
+
+          try {
+            const response = await fetch(API_BASE + "/capture", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              showModal(
+                "Suspect Registered ✅",
+                `
+    <div class="detail"><strong>Full Name:</strong> ${
+      data.full_name || "N/A"
+    }</div>
+    <div class="detail"><strong>Gender:</strong> ${data.gender || "N/A"}</div>
+    <div class="detail"><strong>Crime:</strong> ${data.purpose || "N/A"}</div>
+    <div class="detail"><strong>Suspect ID:</strong> ${
+      data.fingerprint_id
+    }</div>
+  `
+              );
+              document.getElementById("captureForm").reset();
+            } else {
+              showModal("Error ❌", `<div class="detail">${data.error}</div>`);
+            }
+          } catch (error) {
+            showResult(
+              "captureResult",
+              `Network error: ${error.message}`,
+              false
+            );
+          }
+        });
+
+      // Match Form Submission
+      document
+        .getElementById("matchForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const formData = new FormData();
+          formData.append(
+            "fingerprint",
+            document.getElementById("matchFile").files[0]
+          );
+
+          try {
+            const response = await fetch(API_BASE + "/match", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              showModal(
+                "Fingerprint Match 🔍",
+                `
+    <div class="detail"><strong>Best Match:</strong> ${data.best_match}</div>
+    <div class="detail"><strong>Match Score:</strong> ${(
+      data.best_score * 100
+    ).toFixed(2)}%</div>
+    ${
+      data.matched_user_id
+        ? `<div class="detail"><strong>Suspect ID:</strong> ${data.matched_user_id}</div>`
+        : ""
+    }
+  `
+              );
+            } else {
+              showModal("Error ❌", `<div class="detail">${data.error}</div>`);
+            }
+          } catch (error) {
+            showResult("matchResult", `Network error: ${error.message}`, false);
+          }
+        });
+
+      // Records Form Submission
+      document
+        .getElementById("recordsForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const userId = document.getElementById("recordsUserId").value;
+
+          try {
+            const response = await fetch(API_BASE + "/records/" + userId);
+            const data = await response.json();
+
+            if (response.ok) {
+              let recordsHTML = `<div class="detail"><strong>Suspect ID:</strong> ${data.user_id}</div>
+                     <div class="detail"><strong>Total Records:</strong> ${data.total_records}</div>`;
+              if (data.records && data.records.length > 0) {
+                recordsHTML += "<h3>Records:</h3>";
+                data.records.forEach((r) => {
+                  recordsHTML += `<div class="detail">- <strong>${r.crime_type}</strong>: ${r.description} (${r.status})</div>`;
+                });
+              }
+              showModal("Criminal Records 📂", recordsHTML);
+            } else {
+              showModal("Error ❌", `<div class="detail">${data.error}</div>`);
             }
           } catch (error) {
             showResult(
