@@ -55,7 +55,6 @@ def capture_fingerprint():
         user = User(full_name=full_name, gender=gender)
         user_id = user.save()
 
-
         # ✅ Save uploaded file
         filepath = save_uploaded_file(file)
         if not filepath:

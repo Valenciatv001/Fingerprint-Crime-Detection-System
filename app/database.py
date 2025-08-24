@@ -11,8 +11,6 @@ def init_db(app):
         cursor = conn.cursor()
         
         # Create tables
- 
-
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -23,7 +21,6 @@ def init_db(app):
             )
         ''')
 
-        
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS fingerprints (
                 id SERIAL PRIMARY KEY,
