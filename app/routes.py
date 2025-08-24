@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template
 import os
+import json
+import numpy as np
 from .utils import save_uploaded_file
 from .preprocessing import FingerprintPreprocessor
 from .feature_extraction import FeatureExtractor
@@ -13,8 +15,7 @@ print(f"Current working directory: {os.getcwd()}")
 print(f"Templates directory exists: {os.path.exists('templates')}")
 print(f"Files in templates: {os.listdir('templates') if os.path.exists('templates') else 'NOT FOUND'}")
 
-import json
-import numpy as np
+
 
 class NumpyEncoder(json.JSONEncoder):
     """Custom JSON encoder for numpy types"""
@@ -29,8 +30,6 @@ class NumpyEncoder(json.JSONEncoder):
             return obj.tolist()
         else:
             return super(NumpyEncoder, self).default(obj)
-
-
 
 
 
@@ -199,6 +198,52 @@ def match_fingerprint():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+
+# @app.route('/match', methods=['POST'])
+# def match_fingerprint():
+#     file = request.files['fingerprint']
+#     img = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
+
+#     # extract features from uploaded image
+#     uploaded_template = extract_features(img)
+
+#     # fetch templates from DB
+#     cursor = conn.cursor()
+#     cursor.execute("SELECT user_id, fingerprint_template FROM users")
+#     rows = cursor.fetchall()
+
+#     best_match = None
+#     best_score = 0.0
+
+#     for row in rows:
+#         user_id = row[0]
+#         template_bytes = row[1]
+
+#         # convert memoryview → bytes
+#         if isinstance(template_bytes, memoryview):
+#             template_bytes = template_bytes.tobytes()
+
+#         # decode template (if JSON stored)
+#         try:
+#             db_template = json.loads(template_bytes.decode("utf-8"))
+#         except Exception:
+#             continue
+
+#         score = compare_templates(uploaded_template, db_template)
+#         if score > best_score:
+#             best_score = score
+#             best_match = user_id
+
+#     if best_match:
+#         return jsonify({
+#             "matched_user_id": best_match,
+#             "best_score": float(best_score),
+#             "best_match": "Fingerprint matched"
+#         })
+#     else:
+#         return jsonify({"error": "No match found"}), 404
 
 
 @main_bp.route('/records/<int:user_id>', methods=['GET'])
