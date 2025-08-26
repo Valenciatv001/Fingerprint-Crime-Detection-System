@@ -97,54 +97,111 @@ def capture_fingerprint():
         return jsonify({'error': str(e)}), 500
 
 
+# @main_bp.route('/match', methods=['POST'])
+# def match_fingerprint():
+#     try:
+#         if 'fingerprint' not in request.files:
+#             return jsonify({'error': 'No file uploaded'}), 400
+        
+#         file = request.files['fingerprint']
+#         filepath = save_uploaded_file(file)
+#         if not filepath:
+#             return jsonify({'error': 'Invalid file type'}), 400
+        
+#         # Process query fingerprint
+#         preprocessor = FingerprintPreprocessor()
+#         preprocessed = preprocessor.preprocess(filepath)
+        
+#         extractor = FeatureExtractor()
+#         query_template = extractor.extract_features(preprocessed)
+        
+#         # Get all templates from database
+#         database_templates = Fingerprint.get_all_templates()
+        
+#         # Match against database
+#         matcher = FingerprintMatcher()
+        
+#         # Check what method is available and use it
+#         if hasattr(matcher, 'find_best_match'):
+#             result = matcher.find_best_match(query_template, 
+#                                            {k: v['template'] for k, v in database_templates.items()})
+#         elif hasattr(matcher, 'find_match'):  # If method has different name
+#             result = matcher.find_match(query_template, 
+#                                       {k: v['template'] for k, v in database_templates.items()})
+#         else:
+#             return jsonify({'error': 'No matching method found in FingerprintMatcher'}), 500
+        
+#         response = {
+#             'best_match': result.get('best_match'),
+#             'best_score': float(result.get('best_score', 0)),
+#             'matches_found': int(result.get('matches_found', 0)),
+#             'all_matches': result.get('all_matches', [])
+#         }
+        
+#         if 'matched_user_id' in result:
+#             response['matched_user_id'] = result['matched_user_id']
+        
+#         return jsonify(response), 200
+        
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+
 @main_bp.route('/match', methods=['POST'])
 def match_fingerprint():
     try:
+        # --- 1. Validate uploaded file ---
         if 'fingerprint' not in request.files:
             return jsonify({'error': 'No file uploaded'}), 400
-        
+
         file = request.files['fingerprint']
         filepath = save_uploaded_file(file)
         if not filepath:
             return jsonify({'error': 'Invalid file type'}), 400
-        
-        # Process query fingerprint
+
+        # --- 2. Preprocess the query fingerprint ---
         preprocessor = FingerprintPreprocessor()
         preprocessed = preprocessor.preprocess(filepath)
-        
+
         extractor = FeatureExtractor()
         query_template = extractor.extract_features(preprocessed)
-        
-        # Get all templates from database
+
+        # --- 3. Load and normalize database templates ---
         database_templates = Fingerprint.get_all_templates()
-        
-        # Match against database
+        normalized_templates = {}
+        for k, v in database_templates.items():
+            template = v.get('template')
+            if isinstance(template, str):
+                template = json.loads(template)
+            elif not isinstance(template, dict):
+                raise TypeError(f"Unexpected template type for fingerprint {k}: {type(template)}")
+            normalized_templates[k] = template
+
+        # --- 4. Match against database ---
         matcher = FingerprintMatcher()
-        
-        # Check what method is available and use it
         if hasattr(matcher, 'find_best_match'):
-            result = matcher.find_best_match(query_template, 
-                                           {k: v['template'] for k, v in database_templates.items()})
-        elif hasattr(matcher, 'find_match'):  # If method has different name
-            result = matcher.find_match(query_template, 
-                                      {k: v['template'] for k, v in database_templates.items()})
+            result = matcher.find_best_match(query_template, normalized_templates)
+        elif hasattr(matcher, 'find_match'):
+            result = matcher.find_match(query_template, normalized_templates)
         else:
             return jsonify({'error': 'No matching method found in FingerprintMatcher'}), 500
-        
+
+        # --- 5. Prepare response ---
         response = {
             'best_match': result.get('best_match'),
             'best_score': float(result.get('best_score', 0)),
             'matches_found': int(result.get('matches_found', 0)),
             'all_matches': result.get('all_matches', [])
         }
-        
         if 'matched_user_id' in result:
             response['matched_user_id'] = result['matched_user_id']
-        
+
         return jsonify(response), 200
-        
+
     except Exception as e:
+        # Optional: log exception for debugging
+        print(f"[ERROR] Fingerprint match failed: {e}")
         return jsonify({'error': str(e)}), 500
+
 
 
 @main_bp.route('/records/<int:user_id>', methods=['GET'])

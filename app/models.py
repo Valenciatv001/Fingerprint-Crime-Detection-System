@@ -62,6 +62,8 @@ class Fingerprint:
         conn.close()
         return fid
 
+
+
     @staticmethod
     def get_all_templates():
         conn = get_conn()
@@ -77,13 +79,22 @@ class Fingerprint:
                 print(f"[WARNING] Skipping fingerprint {fid} because template is NULL")
                 continue
             try:
+                # Only decode if template is a string
+                if isinstance(template, str):
+                    decoded_template = json.loads(template)
+                elif isinstance(template, dict):
+                    decoded_template = template
+                else:
+                    raise TypeError(f"Unexpected template type for fingerprint {fid}: {type(template)}")
+
                 templates[fid] = {
                     "user_id": user_id,
-                    "template": json.loads(template)
-            }
+                    "template": decoded_template
+                }
             except Exception as e:
                 print(f"[ERROR] Failed to decode template for fingerprint {fid}: {e}")
         return templates
+
 
 class CrimeRecord:
     def __init__(self, user_id, crime_type, description, date_occurred, status):
